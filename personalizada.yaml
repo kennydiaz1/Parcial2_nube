@@ -1,0 +1,157 @@
+#Primero creamos el archivo personalizada.yaml
+
+#Insertamos las siguientes lineas
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: custom-website
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: custom-website
+  template:
+    metadata:
+      labels:
+        app: custom-website
+    spec:
+      nodeSelector:
+        "kubernetes.io/os": linux
+      containers:
+      - name: nginx
+        image: nginx:1.25-alpine
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          failureThreshold: 3
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          failureThreshold: 5
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        volumeMounts:
+        - name: website-content
+          mountPath: /usr/share/nginx/html
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: website-content
+        configMap:
+          name: website-content
+      - name: nginx-config
+        configMap:
+          name: nginx-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: custom-website
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: custom-website
+  type: LoadBalancer
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: website-content
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Mi Sitio Web Personalizado</title>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 0;
+          padding: 20px;
+          background-color: #f8f9fa;
+        }
+        .container {
+          max-width: 1200px;
+          margin: 0 auto;
+          background-color: white;
+          padding: 20px;
+          border-radius: 5px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+          color: #333;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <h1>Bienvenido a Mi Sitio Web Personalizado</h1>
+        <p>Este es un ejemplo de página web servida por Nginx en Kubernetes.</p>
+        <p>Puedes modificar este contenido según tus necesidades.</p>
+      </div>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  default.conf: |
+    server {
+        listen 80;
+        server_name _;
+        
+        location / {
+            root   /usr/share/nginx/html;
+            index  index.html index.htm;
+            try_files $uri $uri/ =404;
+        }
+        
+        # Configuración para el estado de salud
+        location /health {
+            access_log off;
+            return 200 'healthy\n';
+        }
+        
+        # Manejo de errores personalizado
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+        
+        # Compresión gzip para mejorar rendimiento
+        gzip on;
+        gzip_types text/plain text/css application/javascript application/json;
+    }
+
+
+#Realizamos el comando kubectl apply personalizada.yaml
+
+#Revisamos la direccion ip kubectl services para comprobar que funciona la pagina
+
