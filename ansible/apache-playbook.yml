@@ -1,0 +1,39 @@
+---
+- name: Configurar servidor web Apache
+  hosts: webservers
+  become: yes
+  
+  tasks:
+    - name: Actualizar caché de apt
+      apt:
+        update_cache: yes
+      
+    - name: Instalar Apache
+      apt:
+        name: apache2
+        state: present
+      
+    - name: Asegurar que Apache está en ejecución
+      service:
+        name: apache2
+        state: started
+        enabled: yes
+      
+    - name: Crear página de bienvenida personalizada
+      template:
+        src: ./templates/index.html.j2
+        dest: /var/www/html/index.html
+        owner: www-data
+        group: www-data
+        mode: '0644'
+      
+    - name: Permitir el tráfico HTTP en el firewall
+      ufw:
+        rule: allow
+        name: Apache
+        state: enabled
+      ignore_errors: yes
+      
+    - name: Mostrar URL del servidor web
+      debug:
+        msg: "El servidor Apache está ejecutándose en http://192.168.100.2"

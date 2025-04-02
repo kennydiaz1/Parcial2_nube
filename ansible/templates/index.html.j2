@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bienvenido al Servidor Apache</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+            padding: 20px;
+        }
+        header {
+            background: #50b3a2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Bienvenido al Servidor Apache</h1>
+    </header>
+    
+    <div class="container">
+        <h2>Informacion del servidor</h2>
+        <ul>
+            <li><strong>Hostname:</strong> {{ ansible_hostname }}</li>
+            <li><strong>IP:</strong> {{ ansible_host }}</li>
+            <li><strong>Sistema Operativo:</strong> {{ ansible_distribution }} {{ ansible_distribution_version }}</li>
+            <li><strong>Fecha:</strong> {{ ansible_date_time.date }}</li>
+        </ul>
+        
+        <h2>Configuracion completada</h2>
+        <p>Este servidor Apache ha sido configurado automaticamente mediante:</p>
+        <ul>
+            <li>Vagrant - para la creacion del entorno virtualizado</li>
+            <li>Terraform - para la provision de la infraestructura</li>
+            <li>Ansible - para la configuracion y despliegue de Apache</li>
+        </ul>
+        
+        <p>Esta pagina demuestra que la configuracion automatizada fue exitosa.</p>
+    </div>
+    
+    <footer>
+        <p>Microproyecto 2</p>
+    </footer>
+</body>
+</html>
