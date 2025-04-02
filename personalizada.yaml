@@ -1,6 +1,6 @@
 #Primero creamos el archivo personalizada.yaml
 
-#Insertamos las siguientes lineas
+#Insertamos las siguientes lineas:
 
 apiVersion: apps/v1
 kind: Deployment
